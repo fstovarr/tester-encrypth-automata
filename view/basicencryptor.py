@@ -7,6 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
+import sys
 from PySide import QtCore, QtGui
 from modules.util import Util
 
@@ -16,7 +17,7 @@ class Ui_MainWindow(object):
         
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(939, 494)
+        MainWindow.setFixedSize(939, 494)
         MainWindow.setAcceptDrops(False)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")

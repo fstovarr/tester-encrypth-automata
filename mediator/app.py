@@ -46,13 +46,9 @@ class App:
         
     def setAutomatons(self, automatons):
         if(automatons != self.automatons):
-            print 'YAS'
             self.automatons = int(automatons)
-            print 'YAS'
             self.encryptor = encryption(self.size, self.automatons, self.rule)
-            print 'YAS'
             self.mainWindow.changedNumberAutomatons(self.automatons)
-            print 'YAS'
         
     def encrypt(self, text, size):
         if(size != self.size):
@@ -69,8 +65,6 @@ class App:
         j = 1
         for i in self.encryptor.automatons:
             s += 'Automata ' + str(j) + ':\n' + str(i)
-            s += 'blocks len: ' + str(i.blocklen) + '\n' 
-            s += str(i.seq) + "\n\n"
             j += 1
     
         return s

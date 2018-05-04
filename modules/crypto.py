@@ -7,8 +7,7 @@ import numpy as np
 import random as rnd
 import copy
 
-class term:
-    
+class term:    
     def __init__(self, variables, aggregated = False, coefficient = 1):
         self.var = variables
         self.coefficient = coefficient
@@ -262,11 +261,10 @@ class automaton:
     def normalizeKey(self):
         for poly in self.key:
             poly.normalize()
- 
-    def __str__(self):
+            
+    def getKey(self):
         k = 0
         s = ''
-        #s = s + "blocks len: " + str(self.blocklen)
         '''
         for block in self.blocks:
             s = s + "\n" + str(block.ruleevolvemat) + "\n" + str(block.invmat) + "\n"
@@ -282,65 +280,69 @@ class automaton:
             s += 'y_' + str(k) + ' = ' + cell + '\n'
             k += 1 
         
-        return s            
+        return s
+ 
+    def __str__(self):
+        return self.getKey() + "\nBlocks len: " + str(self.blocklen) + "\n"
                 
 class encryption:
-    
-    def __init__(self, n, t, rule = None):
-        """Form a encryption pattern."""
-        self.automatons = []
-        if(rule == 'guan'):
-            self.n = 5
-            self.t = 2
-            aut0 = automaton(5)
-            a = block(3, [0,1,2], 0, aut0)
-            a.rule = [polynomial([ term([1],False) ]), polynomial([term([2],False)]),polynomial([term([0],False)])]
-            a.rulemat=np.array([[0,1,0],[0,0,1],[1,0,0]])
-            a.inv = np.linalg.inv(a.rulemat)
-            a.inv = np.around(a.inv/np.linalg.det(a.inv)).astype(int)%2
-            b = block(2, [3,4], 3, aut0)
-            b.rule = [polynomial([term([4],False), term([0,1],True)]), polynomial([term([3],False), term([1,2],True)])]
-            b.rulemat=np.array([[0,1],[1,0]])    
-            b.inv = np.linalg.inv(b.rulemat)
-            b.inv = np.around(b.inv/np.linalg.det(b.inv)).astype(int)%2
+    def __init__(self, n = 0, t = 0, rule = None, st = None):
+        if(st == None):
+            """Form a encryption pattern."""
+            self.automatons = []
+            if(rule == 'guan'):
+                self.n = 5
+                self.t = 2
+                aut0 = automaton(5)
+                a = block(3, [0,1,2], 0, aut0)
+                a.rule = [polynomial([ term([1],False) ]), polynomial([term([2],False)]),polynomial([term([0],False)])]
+                a.rulemat=np.array([[0,1,0],[0,0,1],[1,0,0]])
+                a.inv = np.linalg.inv(a.rulemat)
+                a.inv = np.around(a.inv/np.linalg.det(a.inv)).astype(int)%2
+                b = block(2, [3,4], 3, aut0)
+                b.rule = [polynomial([term([4],False), term([0,1],True)]), polynomial([term([3],False), term([1,2],True)])]
+                b.rulemat=np.array([[0,1],[1,0]])    
+                b.inv = np.linalg.inv(b.rulemat)
+                b.inv = np.around(b.inv/np.linalg.det(b.inv)).astype(int)%2
+                
+                aut0.blocks = [a, b]
+                aut0.seq = [0,1,2,3,4]    
+                aut0.key = automaton.flatten(aut0.blocks)
+                self.automatons.append(aut0)
+                
+                ######################################
+                aut1 = automaton(5)
+                a = block(2, [3,4], 0, aut1)
+                a.rule = [polynomial([term([3],False)]), polynomial([term([4],False)])]
+                a.rulemat = np.array([[1,0],[0,1]]) 
+                a.inv = np.linalg.inv(a.rulemat)
+                a.inv = np.around(a.inv/np.linalg.det(a.inv)).astype(int)%2
+                b = block(1, [0], 2, aut1)
+                b.rule = [polynomial([term([0],False), term([3,4], True)])] 
+                b.rulemat = np.array([[1]])
+                b.inv = np.linalg.inv(b.rulemat)
+                b.inv = np.around(b.inv/np.linalg.det(b.inv)).astype(int)%2
+                c = block(2, [1,2], 3, aut1)
+                c.rule = [polynomial([term([1],False), term([0,3], True)]), polynomial([term([2],False), term([0], True)])]
+                c.rulemat = np.array([[1,0],[0,1]])
+                c.inv = np.linalg.inv(c.rulemat)
+                c.inv = np.around(c.inv/np.linalg.det(c.inv)).astype(int)%2
+                aut1.blocks = [a, b, c]
+                aut1.seq = [3,4,0,1,2]
+                aut1.key = automaton.flatten(aut1.blocks)
+                self.automatons.append(aut1)
+            else:
+                self.n = n
+                self.t = t    
+                for i in range(t):
+                    self.automatons.append(automaton(n))
             
-            aut0.blocks = [a, b]
-            aut0.seq = [0,1,2,3,4]    
-            aut0.key = automaton.flatten(aut0.blocks)
-            self.automatons.append(aut0)
-
-            
-            
-            ######################################
-            aut1 = automaton(5)
-            a = block(2, [3,4], 0, aut1)
-            a.rule = [polynomial([term([3],False)]), polynomial([term([4],False)])]
-            a.rulemat = np.array([[1,0],[0,1]]) 
-            a.inv = np.linalg.inv(a.rulemat)
-            a.inv = np.around(a.inv/np.linalg.det(a.inv)).astype(int)%2
-            b = block(1, [0], 2, aut1)
-            b.rule = [polynomial([term([0],False), term([3,4], True)])] 
-            b.rulemat = np.array([[1]])
-            b.inv = np.linalg.inv(b.rulemat)
-            b.inv = np.around(b.inv/np.linalg.det(b.inv)).astype(int)%2
-            c = block(2, [1,2], 3, aut1)
-            c.rule = [polynomial([term([1],False), term([0,3], True)]), polynomial([term([2],False), term([0], True)])]
-            c.rulemat = np.array([[1,0],[0,1]])
-            c.inv = np.linalg.inv(c.rulemat)
-            c.inv = np.around(c.inv/np.linalg.det(c.inv)).astype(int)%2
-            aut1.blocks = [a, b, c]
-            aut1.seq = [3,4,0,1,2]
-            aut1.key = automaton.flatten(aut1.blocks)
-            self.automatons.append(aut1)
+            self.composite = copy.deepcopy(self.automatons[t - 1])
+            for i in range(t-1):
+                self.composite.compose(self.automatons[t-2-i], True)                
         else:
-            self.n = n
-            self.t = t    
-            for i in range(t):
-                self.automatons.append(automaton(n))
-        
-        self.composite = copy.deepcopy(self.automatons[t - 1])
-        for i in range(t-1):
-            self.composite.compose(self.automatons[t-2-i], True)
+            arr = st.split("=")
+            print arr[0]
     
     def encrypt(self, plain):
         """Encrypts give plain text by applying underlaying automaton rules"""
@@ -398,7 +400,7 @@ def binstr(i,n):
 #test = min(2**n,10000)
 #testRan = 100
 # 
-#C = encryption(5,2, 'guan')
+#C = encryption(st = 'a = a')
 #b0 = [1, 0, 1, 1, 0]
 #e0 = C.encrypt(b0)
 #d0 = C.decrypt(e0)
@@ -406,10 +408,6 @@ def binstr(i,n):
 #print "PRIVATE"
 #for i in C.automatons:
 #    print i
-#    print "Blocks", i.blocks
-#    for j in i.blocks:
-#        print "rule math", j.rulemat
-#        print "rule", j.rule
 #    
 #print "\n---------------------------\nPUBLIC"
 #print(C.composite)
